@@ -1,0 +1,5 @@
+create table if not exists public.calendar_boards(id text primary key,kind text not null check(kind in('host','team','compare')),title text not null,updated_at timestamptz not null default now());
+alter table public.calendar_boards enable row level security;grant select,insert,update,delete on public.calendar_boards to anon;create policy "link all boards" on public.calendar_boards for all to anon using(true) with check(true);
+alter table public.calendar_events add column if not exists show_label boolean not null default true;alter table public.calendar_events add column if not exists board_id text not null default 'team-main';update public.calendar_events set board_id='host-main' where kind='host';
+insert into public.calendar_boards values('host-main','host','ปฏิทินพิธีกรข่าวแหกโค้ง',now()),('team-main','team','ตารางเวรทีมข่าวแหกโค้ง',now()),('compare-main','compare','ตารางเทียบคิวพิธีกรข่าวแหกโค้ง',now()) on conflict(id) do nothing;
+alter publication supabase_realtime add table public.calendar_boards;
