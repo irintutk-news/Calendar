@@ -21,7 +21,6 @@
     .team-status-filter{display:inline-flex;gap:3px;padding:3px;border:1px solid #d9dee8;border-radius:10px;background:#f7f8fa}
     .team-status-filter button{border:0;background:transparent;padding:7px 10px;border-radius:7px;font-weight:700;color:#667085;cursor:pointer}
     .team-status-filter button.active{background:#111827;color:#fff}
-    .team-filter-empty{padding:8px 10px;border:1px dashed #d0d5dd;border-radius:9px;color:#98a2b3;font-size:12px;background:#fafafa}
     @media(max-width:700px){.header-tools{width:100%;justify-content:space-between}.team-status-filter{width:100%}.team-status-filter button{flex:1}}
   `;
   document.head.appendChild(css);
@@ -85,11 +84,8 @@
         if(show)visible++;
       });
 
-      let empty=day.querySelector('.team-filter-empty');
-      if(teamFilter!=='all'&&visible===0&&!day.classList.contains('out')){
-        if(!empty){empty=document.createElement('div');empty.className='team-filter-empty';day.appendChild(empty);}
-        empty.textContent=teamFilter==='work'?'ไม่มีคนทำงาน':'ไม่มีคนลา';
-      }else if(empty)empty.remove();
+      const empty=day.querySelector('.team-filter-empty');
+      if(empty)empty.remove();
     });
   }
 
