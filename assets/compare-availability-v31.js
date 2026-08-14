@@ -13,9 +13,9 @@ body.viewer-mode #manageAvailability{display:none!important}
 .availability-day.assigned{box-shadow:inset 0 0 0 2px #111827}
 .availability-help{font-size:12px;color:#667085}
 .availability-danger{color:#b42318!important;border-color:#efb5b5!important;background:#fff7f7!important}
-.color-bar-wrap{position:relative;display:inline-block}
-.availability-remove{position:absolute;right:2px;top:2px;width:18px;height:18px;border:0;border-radius:999px;background:#fff;color:#b42318;display:none;cursor:pointer;padding:0;line-height:18px}
-body.admin-mode .color-bar-wrap:hover .availability-remove{display:block}
+.compare-day{position:relative}
+.availability-remove{position:absolute;right:3px;top:3px;width:18px;height:18px;border:0;border-radius:999px;background:#fff;color:#b42318;display:none;cursor:pointer;padding:0;line-height:18px;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,.16)}
+body.admin-mode .compare-day:hover .availability-remove{display:block}
 `;
 document.head.appendChild(css);
 
@@ -125,14 +125,22 @@ renderCompare=function(){
  oldRenderCompare();
  document.querySelectorAll('#compareCalendar .compare-day[data-date]').forEach(day=>{
   const dt=day.dataset.date;
-  [...day.querySelectorAll('.color-bar')].forEach(bar=>{
-   if(bar.parentElement?.classList.contains('color-bar-wrap'))return;
-   const wrap=document.createElement('span');wrap.className='color-bar-wrap';
-   bar.parentNode.insertBefore(wrap,bar);wrap.appendChild(bar);
-   const x=document.createElement('button');x.type='button';x.className='availability-remove';x.textContent='×';x.title='ลบวันว่างวันนี้';
-   x.onclick=e=>{e.preventDefault();e.stopPropagation();toggle(bar.dataset.id,dt)};
-   wrap.appendChild(x);
-  });
+  // Do not wrap or add spacing around color bars: keep all people's bars touching
+  // as one continuous strip, exactly like the original compare view.
+  day.querySelectorAll('.availability-remove').forEach(x=>x.remove());
+  const bars=[...day.querySelectorAll('.color-bar')];
+  if(!bars.length)return;
+  const x=document.createElement('button');
+  x.type='button';x.className='availability-remove';x.textContent='×';
+  x.title='จัดการ/ลบวันว่างวันนี้';
+  x.onclick=e=>{
+    e.preventDefault();e.stopPropagation();
+    // If only one person is available, remove directly.
+    if(bars.length===1){toggle(bars[0].dataset.id,dt);return;}
+    // Multiple people: open manager instead, preserving the continuous bars.
+    openManager(bars[0].dataset.id);
+  };
+  day.appendChild(x);
  });
  document.querySelectorAll('#rangeSummary .range-pill').forEach(pill=>{
   pill.style.cursor='pointer';pill.title='คลิกเพื่อจัดการวันว่าง';
@@ -144,5 +152,5 @@ renderCompare=function(){
  });
 };
 renderCompare();
-if(document.getElementById('versionBadge'))document.getElementById('versionBadge').textContent='v3.1';
+if(document.getElementById('versionBadge'))document.getElementById('versionBadge').textContent='v3.1.2';
 })();
